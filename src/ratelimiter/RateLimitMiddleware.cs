@@ -33,10 +33,11 @@ namespace ratelimiter
 
             using (_logger.BeginScope("Were you allowed?"))
             {
-                await _next.Invoke(context);
+                _logger.LogDebug("Hello world");
+                _logger.LogDebug("Hello world 2");
+                await _next(context);
             }
         }
-
 
         public static async Task<bool> CheckRequestRate(ConnectionMultiplexer conn, string user)
         {

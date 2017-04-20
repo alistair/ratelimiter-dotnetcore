@@ -43,6 +43,7 @@ namespace ratelimiter
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            app.UseMiddleware<RateLimiterMiddleware>();
             app.UseMvc();
         }
     }
