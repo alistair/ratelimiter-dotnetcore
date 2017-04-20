@@ -1,0 +1,17 @@
+
+version: '3'
+services:
+  app:
+    image: "ratelimiter/app"
+    ports:
+      - "5000:5000"
+    build:
+      context: ../../
+      dockerfile: docker/app/Dockerfile
+    links:
+      - "redis"
+    environment:
+      RedisConnection: "172.16.238.16"
+    networks:
+      app_net:
+        ipv4_address: 172.16.238.17
