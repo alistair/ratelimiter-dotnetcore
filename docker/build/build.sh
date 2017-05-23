@@ -10,6 +10,7 @@ trap cleanup EXIT
 
 dotnet restore src/
 dotnet build src/
+dotnet test src/ratelimiter.tests/ratelimiter.tests.csproj
 
 echo "Running publish"
 dotnet publish -f netcoreapp1.1 -c Release src/ratelimiter/
