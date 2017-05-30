@@ -62,7 +62,7 @@ namespace ratelimiter
             return allowed;
         }
 
-        public const int REFRESH_RATE = 1;
+        public const int REFRESH_RATE = 100;
         public const int CAPACITY = 5 * REFRESH_RATE;
 
         public const string LUA_SCRIPT1 = @"

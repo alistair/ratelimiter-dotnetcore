@@ -4,7 +4,7 @@ services:
   app:
     image: "ratelimiter/app"
     ports:
-      - "5000:5000"
+      - "8081:8081"
     build:
       context: ../../
       dockerfile: docker/app/Dockerfile
@@ -12,6 +12,8 @@ services:
       - "redis"
     environment:
       RedisConnection: "172.16.238.16"
+      EventStoreConnection: "ConnectTo=tcp://admin:changeit@eventstore:1113"
+
     networks:
       app_net:
         ipv4_address: 172.16.238.17

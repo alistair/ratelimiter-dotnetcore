@@ -1,0 +1,11 @@
+version: '3'
+services:
+  eventstore:
+    image: "eventstore/eventstore"
+    ports:
+      - "2133:2133"
+      - "1113:1113"
+    environment:
+      EVENTSTORE_RUN_PROJECTIONS: "All"
+    networks:
+      - app_net

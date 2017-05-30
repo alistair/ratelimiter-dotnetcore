@@ -2,7 +2,7 @@ using StoryTeller;
 using System.Threading.Tasks;
 using System.Net.Http;
 
-namespace functionaltests.ApiFixture
+namespace functionaltests.ApiFixtures
 {
     public class BasicApiChecksFixture : Fixture
     {
@@ -16,12 +16,12 @@ namespace functionaltests.ApiFixture
 
         public void HealthCheck()
         {
-            _response = client.GetAsync("http://localhost:5000/api/ping");
+            _response = client.GetAsync("http://localhost:8081/api/ping");
         }
 
         public void Values()
         {
-            _response = client.GetAsync("http://localhost:5000/api/values");
+            _response = client.GetAsync("http://localhost:8081/api/values");
         }
 
         public async Task ValidStatus()
