@@ -21,7 +21,6 @@ namespace ratelimiter.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            _logger.LogDebug("Here we are?");
             return new string[] { "value1", "value2" };
         }
 

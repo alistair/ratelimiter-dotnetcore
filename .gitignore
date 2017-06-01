@@ -6,6 +6,7 @@
 dist
 bin
 obj
+report
 
 # User-specific files
 *.suo

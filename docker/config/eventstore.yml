@@ -7,5 +7,6 @@ services:
       - "1113:1113"
     environment:
       EVENTSTORE_RUN_PROJECTIONS: "All"
+      EVENTSTORE_START_STANDARD_PROJECTIONS: "true"
     networks:
       - app_net

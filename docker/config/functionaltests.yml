@@ -1,16 +1,23 @@
-
 version: '3'
 services:
-  app:
-    image: "ratelimiter/app"
+  functionaltests:
+    image: "ratelimiter/build"
     ports:
-      - "8081:8081"
+      - "5000:5000"
+    command: /usr/src/app/functionaltest.sh
     build:
       context: ../../
       dockerfile: docker/app/Dockerfile
+    volumes:
+      - ./../../report/:/usr/src/app/report/
+    links:
+      - app
     environment:
       RedisConnection: "172.16.238.16"
       EventStoreConnection: "ConnectTo=tcp://admin:changeit@eventstore:1113"
+      APP_URL: "http://app:8081"
+      USER_ID:
+      GROUP_ID:
 
     networks:
       - app_net

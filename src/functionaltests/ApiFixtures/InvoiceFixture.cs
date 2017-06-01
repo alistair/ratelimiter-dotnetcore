@@ -9,6 +9,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using StoryTeller;
 using StoryTeller.Grammars.API;
+using StoryTeller.Json;
 
 namespace functionaltests.ApiFixtures
 {
@@ -20,22 +21,42 @@ namespace functionaltests.ApiFixtures
         public decimal Total { get; set; }
     }
 
+    public class InvoiceCreated
+    {
+        public Guid Id { get; set; }
+        public List<LineItem> Items { get; set; }
+    }
 
-    public class ApiResponse
+    public class LineItem
+    {
+        public string Number { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Total { get; set; }
+        public int Quantity { get; set; }
+    }
+
+
+    public class ApiResponse<T>
     {
         public HttpStatusCode Status { get; set; }
 
         public string Body { get; set; }
+
+        public T Response { get; set; }
     }
 
     public class InvoiceFixture : Fixture
     {
         public IGrammar CreateInvoice() {
-            return Embed<BasicApiFixture<Invoice>>("Create Invoice in api");
+            return Embed<BasicApiFixture<Invoice, InvoiceCreated>>("Create Invoice in api");
+        }
+
+        public IGrammar CheckJsonResponse() {
+            return Embed<InvoiceCreatedJsonComparisonFixture>("Ensure response body is");
         }
     }
 
-    public class BasicApiFixture<T> : ApiFixture<T, ApiResponse> where T : class
+    public class BasicApiFixture<T, TOut> : ApiFixture<T, ApiResponse<TOut>> where T : class
     {
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
         {
@@ -46,24 +67,49 @@ namespace functionaltests.ApiFixtures
             Converters = new List<JsonConverter> { new StringEnumConverter { CamelCaseText = false }}
         };
 
-        protected override async Task<ApiResponse> execute(T input)
+        protected override Task<ApiResponse<TOut>> execute(T input)
         {
             var body = JsonConvert.SerializeObject(input, _settings);
             var content = new StringContent(body, Encoding.UTF8, "application/json");
 
             var httpClient = new HttpClient();
 
-            var response = await httpClient.PostAsync(
-                "http://localhost:8081/api/invoice", content);
-            var responsebody = await response.Content.ReadAsStringAsync();
+            var url = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:8081";
 
-            Console.WriteLine($"Response.StatusCode={response.StatusCode}");
-            Console.WriteLine(responsebody);
-            return new ApiResponse
+            Console.WriteLine($"URL={url}");
+
+            var response = httpClient.PostAsync(
+                $"{url}/api/invoice", content).Result;
+            var responsebody = response.Content.ReadAsStringAsync().Result;
+            Console.WriteLine($"Response is {response.StatusCode}");
+
+            var responseObject = JsonConvert.DeserializeObject<TOut>(responsebody, _settings);
+
+            var result = new ApiResponse<TOut>
             {
                 Status = response.StatusCode,
-                Body = responsebody
+                Body = responsebody,
+                Response = responseObject
             };
+            Context.State.Store(result);
+
+            return Task.FromResult(result);
         }
     }
+
+    public class InvoiceCreatedJsonComparisonFixture : JsonComparisonFixture {
+
+        public override void SetUp() {
+            var output = Context.State.Retrieve<ApiResponse<InvoiceCreated>>();
+            Console.WriteLine($"JsonCmp: {output.Body}");
+            CurrentObject = output.Body;
+            StoreJson(output.Body);
+        }
+
+        public IGrammar AmountIs() {
+            return CheckJsonValue<decimal>("$.items[0].amount", "The Amount should be {amount}");
+        }
+    }
+
+
 }
