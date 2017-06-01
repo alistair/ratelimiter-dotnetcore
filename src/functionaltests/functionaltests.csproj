@@ -10,6 +10,7 @@
     <PackageReference Include="Storyteller" Version="4.2.0" />
     <PackageReference Include="Alba" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="EventStore.ClientAPI.NetCore" Version="4.0.0-alpha-1" />
   </ItemGroup>
 
   <ItemGroup>

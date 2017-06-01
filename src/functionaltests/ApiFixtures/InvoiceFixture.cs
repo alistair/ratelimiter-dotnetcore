@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using EventStore.ClientAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -53,6 +55,13 @@ namespace functionaltests.ApiFixtures
 
         public IGrammar CheckJsonResponse() {
             return Embed<InvoiceCreatedJsonComparisonFixture>("Ensure response body is");
+        }
+
+        public IGrammar CheckEventStore() {
+            return Embed<EventStoreFixture>("And Check an event was published").Before(x => {
+                var invoiceCreated = x.State.Retrieve<ApiResponse<InvoiceCreated>>();
+                x.State.CurrentObject = $"invoices/{invoiceCreated.Response.Id}";
+            });
         }
     }
 
@@ -111,5 +120,22 @@ namespace functionaltests.ApiFixtures
         }
     }
 
+    public class EventStoreFixture : JsonComparisonFixture {
+        public object EventStoreConnectionSetting { get; private set; }
+
+        public override void SetUp() {
+            var stream = (string)CurrentObject;
+
+            var cString = Environment.GetEnvironmentVariable("EventStoreConnection")
+                ?? "ConnectTo=tcp://admin:changeit@localhost:1113";
+            var connection = EventStoreConnection.Create(cString);
+            connection.ConnectAsync().Wait();
+
+            var result = connection.ReadStreamEventsForwardAsync(stream, 0, 100, false).Result;
+            Console.WriteLine($"Hello Events:");
+            var a = string.Join(",", result.Events.Select(x => Encoding.UTF8.GetString(x.Event.Data)));
+            base.StoreJson("{ results: [" + a + "]}");
+        }
+    }
 
 }
