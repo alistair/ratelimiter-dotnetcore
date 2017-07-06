@@ -14,3 +14,6 @@ Otherwise this is my recommended approach for setting up dotnet projects.
 
 1) ./run-dependencies-only.sh
 dotnet run .....
+
+
+test
